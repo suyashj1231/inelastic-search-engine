@@ -16,7 +16,7 @@ It indexes UCI's ICS web crawl (the `DEV` corpus of JSON page dumps).
  query ─▶ tokenizer ─▶ Boolean AND (smallest postings first) ─▶ TF-IDF + scaled PageRank ─▶ top 5
 ```
 
-**Cleaning what a user actually sees.** `extract_text` drops `<script>`, `<style>` and `<noscript>`, anything hidden with inline CSS (`display:none`, `visibility:hidden`, `opacity:0`), `aria-hidden` elements, common hidden classes, and footers. Text from `<title>`, `<h1>`–`<h3>`, `<b>` and `<strong>` is kept separately as "important" text.
+**Cleaning what a user actually sees.** `extract_text` drops `<script>`, `<style>` and `<noscript>`, anything hidden with inline CSS (`display:none`, `visibility:hidden`, `opacity:0`), `aria-hidden` elements, common hidden classes, and footers. Text from `<title>`, `<h1>`-`<h3>`, `<b>` and `<strong>` is kept separately as "important" text.
 
 **Field-weighted index.** Tokens are lowercased, stripped of punctuation and Porter-stemmed with NLTK. Each posting stores a document id and a weight, and a term that appears in an important field adds 2 to its weight, so a match in a page title outranks a match buried in body text.
 
