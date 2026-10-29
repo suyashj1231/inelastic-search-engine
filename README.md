@@ -16,15 +16,25 @@ It indexes UCI's ICS web crawl (the `DEV` corpus of JSON page dumps).
  query ─▶ tokenizer ─▶ Boolean AND (smallest postings first) ─▶ TF-IDF + scaled PageRank ─▶ top 5
 ```
 
-**Cleaning what a user actually sees.** `extract_text` drops `<script>`, `<style>` and `<noscript>`, anything hidden with inline CSS (`display:none`, `visibility:hidden`, `opacity:0`), `aria-hidden` elements, common hidden classes, and footers. Text from `<title>`, `<h1>`-`<h3>`, `<b>` and `<strong>` is kept separately as "important" text.
+### Cleaning what a user actually sees
 
-**Field-weighted index.** Tokens are lowercased, stripped of punctuation and Porter-stemmed with NLTK. Each posting stores a document id and a weight, and a term that appears in an important field adds 2 to its weight, so a match in a page title outranks a match buried in body text.
+`extract_text` drops `<script>`, `<style>` and `<noscript>`, anything hidden with inline CSS (`display:none`, `visibility:hidden`, `opacity:0`), `aria-hidden` elements, common hidden classes, and footers. Text from `<title>`, `<h1>`-`<h3>`, `<b>` and `<strong>` is kept separately as "important" text.
 
-**Retrieval.** Queries go through the same tokenizer, then a Boolean AND intersects the postings lists, starting with the smallest so the working set shrinks as fast as possible, and stops early once it has enough candidates.
+### Field-weighted index
 
-**Ranking.** Each candidate gets a smoothed TF-IDF score (`idf = log((N+1)/(df+1)) + 1`). PageRank is computed by power iteration (damping 0.85, 20 iterations, dangling nodes spread uniformly) and rescaled into the TF-IDF range before the two are added, so neither signal swamps the other.
+Tokens are lowercased, stripped of punctuation and Porter-stemmed with NLTK. Each posting stores a document id and a weight, and a term that appears in an important field adds 2 to its weight, so a match in a page title outranks a match buried in body text.
 
-**Summaries.** `summarizer.py` wraps Hugging Face's `facebook/bart-large-cnn` to produce a two-sentence abstractive summary per result. It's off by default because running BART over a whole crawl at index time is slow; uncomment the calls in `build_index.py` and `search.py` to turn it on.
+### Retrieval
+
+Queries go through the same tokenizer, then a Boolean AND intersects the postings lists, starting with the smallest so the working set shrinks as fast as possible, and stops early once it has enough candidates.
+
+### Ranking
+
+Each candidate gets a smoothed TF-IDF score (`idf = log((N+1)/(df+1)) + 1`). PageRank is computed by power iteration (damping 0.85, 20 iterations, dangling nodes spread uniformly) and rescaled into the TF-IDF range before the two are added, so neither signal swamps the other.
+
+### Summaries
+
+`summarizer.py` wraps Hugging Face's `facebook/bart-large-cnn` to produce a two-sentence abstractive summary per result. It's off by default because running BART over a whole crawl at index time is slow; uncomment the calls in `build_index.py` and `search.py` to turn it on.
 
 ## Run it
 
